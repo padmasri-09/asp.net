@@ -1,0 +1,132 @@
+---------------Stored Procedure-----------------------------------------
+__________________________________________________________________________
+use FootBallLeague
+create procedure FootBallLeague
+(
+   @MatchId int,
+   @TeamName1 varchar(50),
+   @TeamName2 varchar(50),
+   @Status varchar(50),
+   @WinningTeam varchar(50),
+   @Points int
+)
+as 
+begin
+insert into FootBallTeam(MatchId,TeamName1,TeamName2,Status,WinningTeam,Points)
+values(@MatchId,@TeamName1,@TeamName2,@Status,@WinningTeam,@Points)
+end
+
+-------------------SaveDataController.cs(Controller)------------------------
+______________________________________________________________________________
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Data;
+using System.Data.SqlClient;
+
+
+
+namespace SaveDataUsingStoredProcedureMVC.Controllers
+{
+    public class SaveDataController : Controller
+    {
+        public ActionResult SaveData()
+        {
+            ViewBag.result = "";
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult SaveData(string MatchId, string TeamName1, string TeamName2, string Status, string WinningTeam, int Points)
+        {
+            String constring = "Data Source=DESKTOP-5IT2VCC;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+            SqlConnection sqlcon = new SqlConnection(constring);
+            String pname = "FootBallLeague"; 
+            sqlcon.Open();
+            SqlCommand com = new SqlCommand(pname, sqlcon);
+            com.CommandType = CommandType.StoredProcedure;
+            com.Parameters.AddWithValue("@Matchid", Convert.ToInt32(MatchId));
+            com.Parameters.AddWithValue("@Teamname1", TeamName1);
+            com.Parameters.AddWithValue("@Teamname2", TeamName2);
+            com.Parameters.AddWithValue("@Status", Status);
+            com.Parameters.AddWithValue("@Winningteam", WinningTeam);
+            com.Parameters.AddWithValue("@Points", Convert.ToInt32(Points));
+            com.ExecuteNonQuery();
+            sqlcon.Close();
+            ViewBag.result = "Record Has Been Saved Successfully";
+            return View();
+        }
+
+    }
+}
+
+
+----------------------------View(SaveData)-------------------------------------
+________________________________________________________________________________
+
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>SaveData</title>
+</head>
+<body>
+    <h1 align="center">Foot Ball League</h1>
+    <h3 align="center"><font color="Red"> Add Match Data</font></h3>
+    <div>
+        <form action="/SaveData/SaveData" method="post">
+            <center>
+                <table border="1" bgcolor="Green" height="300" width="300">
+                    <tr>
+                        <td>MatchId</td>
+                        <td><input type="text" name="MatchId" /></td>
+                    </tr>
+                    <tr>
+                        <td>TeamName1</td>
+                        <td><input type="text" name="TeamName1" /></td>
+                    </tr>
+                    <tr>
+                        <td>TeamName2</td>
+                        <td><input type="text" name="TeamName2" /></td>
+                    </tr>
+                    <tr>
+                        <td>Status</td>
+                        <td>
+                            <select class="form-control" id="WinningTeam" name="WinningTeam">
+                                <option>Select</option>
+                                <option>Win</option>
+                                <option>Draw</option>
+                            </select>
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <td>WinningTeam</td>
+                        <td><input type="text" name="WinningTeam" /></td>
+                    </tr>
+                    <tr>
+                        <td>Points</td>
+                        <td><input type="text" name="Points" /></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="center"><input type="submit" value="Save Data" /></td>
+                    </tr>
+                </table>
+            </center>
+            @ViewBag.result
+        </form>
+    </div>
+</body>
+</html>
+
+
+
